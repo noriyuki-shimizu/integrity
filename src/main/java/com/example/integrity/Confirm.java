@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 import org.springframework.util.ResourceUtils;
 
 import java.io.FileNotFoundException;
@@ -17,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Confirm {
     private static final String URL = "jdbc:mysql://localhost:3307/pokemon?serverTimezone=JST";
@@ -37,6 +35,9 @@ public class Confirm {
         private Integer pokemonEvolutionId;
     }
 
+    /**
+     * 実行
+     */
     public void exec() {
         final List<Pokemon> jsonData = getJsonData();
         final List<Pokemon> dbData = getDbData();
@@ -71,6 +72,7 @@ public class Confirm {
     private List<Pokemon> getDbData() {
         try (Connection conn =
                      DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             // TODO 接続するテーブルの指定を汎用的にしたい
              PreparedStatement ps = conn.prepareStatement("select * from pokemons")) {
 
             final List<Pokemon> pokemons = new ArrayList<>();
@@ -97,10 +99,15 @@ public class Confirm {
         return Collections.emptyList();
     }
 
+    /**
+     * JSON ファイルからデータを読み取ります.
+     * @return JSON データリスト
+     */
     private List<Pokemon> getJsonData() {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
+            // TODO JSONファイルの指定を汎用的にしたい
             return mapper.readValue(ResourceUtils.getFile("classpath:pokemons.json"), new TypeReference<List<Pokemon>>() {});
         } catch (JsonProcessingException | FileNotFoundException e) {
             e.printStackTrace();
